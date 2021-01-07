@@ -41,6 +41,7 @@
 #' @param exaggeration_factor numeric; Exaggeration factor used to multiply the P matrix in the first part of the optimization (default: 12.0)
 #' @param num_threads integer; Number of threads to use when using OpenMP, default is 1. Setting to 0 corresponds to detecting and using all available cores
 #' @param weights vector;the weight for cost
+#' @param col_weights vector;the weight for column. Note that when using this, the pca_scale will Mandatory designation as FALSE
 #'
 #' @return List with the following elements:
 #' \item{Y}{Matrix containing the new representations for the objects}
@@ -129,7 +130,7 @@ wtsne.default <- function(X, dims=2, initial_dims=50,
                           stop_lying_iter=ifelse(is.null(Y_init),250L,0L),
                           mom_switch_iter=ifelse(is.null(Y_init),250L,0L),
                           momentum=0.5, final_momentum=0.8,
-                          eta=200.0, exaggeration_factor=12.0, num_threads=1,weights = rep(1,NROW(X)), ...) {
+                          eta=200.0, exaggeration_factor=12.0, num_threads=1,weights = rep(1,NROW(X)),col_weights = NULL, ...) {
 
   if (!is.logical(is_distance)) { stop("is_distance should be a logical variable")}
   if (!is.matrix(X)) { stop("Input X is not a matrix")}
@@ -140,12 +141,16 @@ wtsne.default <- function(X, dims=2, initial_dims=50,
   tsne.args <- .check_tsne_params(nrow(X), dims=dims, perplexity=perplexity, theta=theta, max_iter=max_iter, verbose=verbose,
         Y_init=Y_init, stop_lying_iter=stop_lying_iter, mom_switch_iter=mom_switch_iter,
         momentum=momentum, final_momentum=final_momentum, eta=eta, exaggeration_factor=exaggeration_factor,weights = weights)
-
+  if(!is.null(col_weights)&length(col_weights)!=ncol(X)) { stop("number of col_weights need equal to column of X") }
+  if(!is.null(col_weights)) pca_scale <- FALSE
   # Check for missing values
   X <- na.fail(X)
 
   # Apply PCA
   if (!is_distance) {
+    if(!is.null(col_weights)){
+      X <- addColWeight(X,col_weights)
+    }
     if (pca) {
       if(verbose) cat("Performing PCA\n")
       if(partial_pca){

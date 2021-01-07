@@ -54,6 +54,7 @@ wtsne(X, ...)
   exaggeration_factor = 12,
   num_threads = 1,
   weights = rep(1, NROW(X)),
+  col_weights = NULL,
   ...
 )
 
@@ -113,6 +114,8 @@ wtsne(X, ...)
 \item{pca_scale}{logical; Should data be scaled before pca is applied? (default: FALSE)}
 
 \item{normalize}{logical; Should data be normalized internally prior to distance calculations with \code{\link{normalize_input}}? (default: TRUE)}
+
+\item{col_weights}{vector;the weight for column. Note that when using this, the pca_scale will Mandatory designation as FALSE}
 }
 \value{
 List with the following elements:

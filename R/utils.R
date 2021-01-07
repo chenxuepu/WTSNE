@@ -11,7 +11,7 @@
 #' Rescaling the input values mitigates these problems to some extent.
 #'
 #' @return A numeric matrix of the same dimensions as \code{X} but centred by column and scaled to have a maximum deviation of 1.
-#' 
+#'
 #' @author
 #' Aaron Lun
 #'
@@ -27,6 +27,12 @@ normalize_input <- function(X) {
     # This is because R's sums are more numerically precise, so for consistency with the original code, we need to use the naive C++ version.
     normalize_input_cpp(X)
 }
+
+addColWeight <- function(x,col_weights){
+    x*matrix(col_weights,nrow = nrow(x),ncol = ncol(x),byrow = TRUE)
+}
+
+
 
 is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)
 # Checks if the input is a whole number.
@@ -52,7 +58,7 @@ is.wholenumber <- function(x, tol = .Machine$double.eps^0.5)
     if (!is.numeric(eta) || eta <= 0) { stop("eta should be a positive number") }
     if (!is.numeric(exaggeration_factor) || exaggeration_factor <= 0) { stop("exaggeration_factor should be a positive number")}
     if (sum(weights)!=nsamples) weights <- (weights/sum(weights))*nsamples
-    
+
     if (nsamples - 1 < 3 * perplexity) { stop("perplexity is too large for the number of samples")}
 
     init <- !is.null(Y_init)
